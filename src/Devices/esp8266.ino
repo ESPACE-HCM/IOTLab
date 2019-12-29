@@ -4,7 +4,6 @@
 const char* ssid = "ESPACE24";
 const char* password = "Innov@tion";
 HTTPClient http;
-
 void setup()
 {
     Serial.begin(115200);
@@ -21,7 +20,10 @@ void loop()
 {
     GETMethod();
     delay(1000);
-    POSTMethod();
+    POSTMethod("/add");
+    POSTMethod("/subtract");
+    POSTMethod("/multiple");
+    POSTMethod("/devide");
     delay(1000);
 }
 
@@ -40,10 +42,10 @@ void GETMethod()
     http.end();
 }
 
-void POSTMethod()
+void POSTMethod(String path)
 {
     Serial.print("METHOD POST:");
-    http.begin("http://192.168.1.102:2383/");
+    http.begin("http://192.168.1.102:2383" + path);
     http.addHeader("Content-Type", "text/plain");
     int httpCode = http.POST("{\"x\":198,\"y\":345}");    
     Serial.print("Get status:");
@@ -51,6 +53,7 @@ void POSTMethod()
     if(httpCode > 0)
     {
         String response = http.getString();
+        Serial.println(http.header(200));
         Serial.println(response);          
     }  
     http.end();

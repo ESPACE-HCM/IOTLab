@@ -1,5 +1,6 @@
 // Main application
 var http = require('http');
+var url = require('url');
 
 http.createServer(function (request, response) {
     var method = request.method;
@@ -25,6 +26,7 @@ function handleGETMethod(response) {
 
 function handlePOSTMethod(request, response) {
     var body = "";
+    var address = url.parse(request.url, true);
     request.on('data', function (data) {
         body += data;
     });
@@ -32,8 +34,27 @@ function handlePOSTMethod(request, response) {
         var data = JSON.parse(body);
         var x = data.x;
         var y = data.y;
-        var z = x + y;
-        response.write(x + " + " + y + " = " + z);
+        if (address.path == "/add") {
+            var z = x + y;
+            response.write(x + " + " + y + " = " + z);
+        }
+        else if (address.path == "/subtract") {
+            var z = x - y;
+            response.write(x + " - " + y + " = " + z);
+        }
+        else if (address.path == "/multiple") {
+            var z = x * y;
+            response.write(x + " * " + y + " = " + z);
+        }
+        else if (address.path == "/devide") {
+            var z = x / y;
+            response.write(x + " / " + y + " = " + z);
+        }
+        else{
+            response.statusCode = 404;
+            response.write(address.path);
+            console.log(data);
+        }
         response.end();
     });
 }
