@@ -1,17 +1,33 @@
 var express = require('express');
-
 var app = express();
-
-app.get('/', function(request, response){
-   response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-   response.write("Welcome you to E-Space!");
-   response.end();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true })); 
+ 
+function eSpaceMiddleware(request, response, next) {
+    var x = parseInt(request.body.x);
+    var y = parseInt(request.body.y);
+    request.x = x;
+    request.y = y;
+    next();
+}
+app.use(eSpaceMiddleware);
+ 
+app.post('/add', function(request, response){
+    var z = request.x + request.y;
+    response.send(request.x + " + " + request.y + " = " + z);
 });
-
-app.get('/slogan', function(request, response){
-   response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-   response.write("E-Space: Không gian sáng tạo");
-   response.end();
+app.post('/subtract', function(request, response){
+    var z = request.x - request.y;
+    response.send(request.x + " - " + request.y + " = " + z);
 });
-
-app.listen(2383);
+app.post('/multiple', function(request, response){
+    var z = request.x * request.y;
+    response.send(request.x + " * " + request.y + " = " + z);
+});
+app.post('/divide', function(request, response){
+    var z = request.x / request.y;
+    response.send(request.x+ " / " + request.y + " = " + z);
+});
+ 
+app.listen(2382);
