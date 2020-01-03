@@ -1,10 +1,15 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true })); 
- 
+app.use(bodyParser.text())
+
 function eSpaceMiddleware(request, response, next) {
+    
+    console.log("Get request");
+    console.log(request.body);
     var x = parseInt(request.body.x);
     var y = parseInt(request.body.y);
     request.x = x;
@@ -14,6 +19,7 @@ function eSpaceMiddleware(request, response, next) {
 app.use(eSpaceMiddleware);
  
 app.post('/add', function(request, response){
+    
     var z = request.x + request.y;
     response.send(request.x + " + " + request.y + " = " + z);
 });
@@ -30,4 +36,8 @@ app.post('/divide', function(request, response){
     response.send(request.x+ " / " + request.y + " = " + z);
 });
  
-app.listen(2382);
+app.get('/', function(request, response){
+   response.sendFile('./views/index.html', { root: __dirname });
+});
+
+app.listen(2383);

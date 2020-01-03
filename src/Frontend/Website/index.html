@@ -1,0 +1,102 @@
+<h1>Giới thiệu</h1>
+Hiện nay, với sự phát triển của công nghệ,thì các dự án IOT càng trở nên phổ biến. Và các đồ án của sinh viên cũng càng
+ngày càng phát triển theo hướng đó.
+Với 1 chút ít kinh nghiệm, chúng tôi sẽ cùng các bạn tiếp cận, tìm hiểu và thực hiện một web server đơn giản cho một dự
+án IOT.
+
+Trong phần này chúng ta thực hành sử dụng những gì ta đã học để xây dựng một ứng dụng IOT đơn giả.
+<p>
+<h1>Yêu cầu 1</h1>
+<ul>
+    <ol>1. Xây dựng mô hình IOT đơn giản gồm 1 webserver, 1 website, 1 device</ol>
+    <ol>2. Webserver trả về website khi truy cập trang chủ.</ol>
+    <ol>3. Website là một trang web chứa 1 form có 1 button và 1 check box trạng thái. Khi form submit gửi request bật tắt đèn lên sever. Bật hay tắt do checkbox quy định</ol>
+    <ol>4. Device sẵn sàng nhận request từ sever với chu kỳ 1 giây. Khi nhận được request bật tắt đèn, sẽ thay đổi tương ứng</ol>
+</ul>
+</p>
+<p>
+<h2>Thiết kê website client</h2>
+<div>
+Từ yêu cầu trên, ta xây dựng 1 web site đơn giản. Gồm 1 form, với action là 1 địa chỉ cố định và method là post. Trong form chứa 1 check box và 1 button. 
+</div>
+[code language="html"]
+<form action="/led" method="post">
+    <p><input type="checkbox" name="status">Bật đèn</input></p>
+    <p><button type="submit">submit</button></p> 
+</form>
+[/code]
+</p>
+<p>
+    <h2>Thiết kế sever</h2>
+    Sever xử lý 3 routes. 
+    <span style="font-family: 'Courier New'; color:#007241">GET /</span>: Khi người dùng browse tới trang chủ 
+    <span style="font-family: 'Courier New'; color:#007241">POST /led</span>: Khi form được submit
+    <span style="font-family: 'Courier New'; color:#007241">GET /led</span>: Khi ESP8266 get status điều khiển
+    [code language="js"]
+    var ledRequest = "NoRequest";
+    app.get("/", function (request, response) {
+        response.sendFile('views/index.html', {root: __dirname});
+    })
+
+    app.post("/led", function (request, response) {
+        if (request.body.status) {
+            ledRequest = request.body.status;
+        }
+        else {
+            ledRequest = "off";
+        }
+        response.send("OK");
+    })
+
+    app.get("/led", function (request, response) {
+        response.send(ledRequest);
+        ledRequest = "NoRequest";
+        
+    })
+    [/code]
+</p>
+
+<p>
+    <h2>Thiết kế xủa lý ESP8266</h2>
+    <div>ESP8266 sau khi kết nối vào wifi, sẽ liên tục gửi request tới sever. Khi sever chưa có request, nó sẽ trả về "NoRequest", khi có request on hay off, sever trả về tương ứng.</div>
+    [code language="arduino"]
+    String address = "http://192.168.1.104/led";
+    http.begin(address);    
+    int httpCode = http.GET();            
+    String payload = http.getString(); 
+    if(payload == "on")
+    {
+        digitalWrite(LED, HIGH);
+    }
+    else if (payload == "off")
+    {
+        digitalWrite(LED, LOW);
+    }
+    delay(1000);
+    [/code]
+</p>
+
+<p>Phần code mẫu trên đây chỉ bao gồm các method cơ bản, chứ không phải code đầy đủ. Bạn cần thêm css vào website, import các module cần thiết vào phần sever, và hoàn thiện code cho ESP8266 trước khi chạy.
+    Kết quả như bên dưới.
+</p>
+
+<p>
+<h1>Yêu cầu 2</h1>
+<div>Mở rộng phần 5 cho nhiều đèn LED</div>
+</p>
+<p>
+    <h2>Trang web</h2>
+    Cách 1: Thêm các check box vào form.
+    [code language="html"]
+    <form action="/led" method="post">
+        <p><input type="checkbox" name="led1">Bật LED 1</input></p>
+        <p><input type="checkbox" name="led2">Bật LED 2</input></p>
+        <p><input type="checkbox" name="led3">Bật LED 3</input></p>
+        <p><input type="checkbox" name="led4">Bật LED 4</input></p>
+        <p><input type="checkbox" name="led5">Bật LED 5</input></p>
+        <p><button type="submit">submit</button></p> 
+    </form>
+    [/code]
+    Như vậy với cách trên, mỗi lần submit ta phải submit cả 5 LED, dù có những Led ta không muốn đổi trạng thái.<br>
+    Cách 2: Tạo 5 form thay vì 5 LED.
+</p>
